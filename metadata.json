@@ -1,0 +1,6 @@
+{
+  "name": "Pakka Patriot",
+  "description": "Official Pakka Patriot digital portal showcasing beautiful stories, historical insights, and syncing live WooCommerce merchandise.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
