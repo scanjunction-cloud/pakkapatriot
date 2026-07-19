@@ -5,7 +5,8 @@
 
 import { motion } from "motion/react";
 import { Play, ArrowRight } from "lucide-react";
-import heroImg from "../assets/images/pakka_hero_character_1784465102215.jpg";
+
+const HERO_IMAGE = "https://res.cloudinary.com/tnpcxibd/image/upload/v1784474161/ChatGPT_Image_Jul_19_2026_08_43_12_PM_qprha1.png";
 
 interface HeroProps {
   onExploreStories: () => void;
@@ -14,7 +15,7 @@ interface HeroProps {
 
 export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
   return (
-    <section className="relative overflow-hidden pt-12 pb-16 sm:pb-24 lg:pt-20 lg:pb-24">
+    <section className="relative overflow-hidden pt-12 pb-16 sm:pb-24 lg:pt-20 lg:pb-24 bg-[#F8F0EB]">
       {/* Dynamic graphic particles in background */}
       <div className="absolute top-1/4 left-10 w-24 h-24 bg-[#F6B828]/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute bottom-10 right-1/4 w-36 h-36 bg-[#EB5A12]/10 rounded-full blur-3xl pointer-events-none" />
@@ -23,7 +24,7 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left column: Text Content */}
-          <div className="lg:col-span-6 flex flex-col items-start text-left order-2 lg:order-1">
+          <div className="lg:col-span-5 flex flex-col items-start text-left order-2 lg:order-1">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -75,20 +76,20 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
           </div>
 
           {/* Right column: Beautifully structured graphic */}
-          <div className="lg:col-span-6 flex justify-center order-1 lg:order-2">
+          <div className="lg:col-span-7 flex justify-center order-1 lg:order-2">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7 }}
-              className="relative w-full max-w-md sm:max-w-lg lg:max-w-none"
+              className="relative w-full"
             >
               {/* Backing Sun disk */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-[#FBECE6] rounded-full pointer-events-none -z-10" />
               
               {/* Main character image */}
               <img
-                src={heroImg}
-                alt="Pakka Patriot Character and India Gate"
+                src={HERO_IMAGE}
+                alt="Pakka Patriot Character — Know India. Be India."
                 className="w-full h-auto rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]"
                 referrerPolicy="no-referrer"
               />

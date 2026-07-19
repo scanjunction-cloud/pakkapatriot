@@ -196,6 +196,8 @@ export const FALLBACK_PRODUCTS: WCProduct[] = [
 
 // Base URLs
 const WORDPRESS_BASE_URL = "https://pakkapatriot.com/wp-json";
+// Same-origin proxy avoids CORS issues — Vite proxy in dev, Vercel serverless function in production
+const WOOCOMMERCE_PROXY_URL = "/api/woocommerce";
 
 /**
  * Fetch latest stories/posts from pakkapatriot.com
@@ -284,10 +286,13 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
 
 /**
  * Fetch latest products from pakkapatriot.com WooCommerce Store API
+ * Uses a same-origin proxy to avoid CORS issues entirely.
+ * In dev: Vite proxy rewrites the request to WordPress.
+ * In production: Vercel serverless function proxies the request.
  */
 export async function fetchWooCommerceProducts(): Promise<WCProduct[]> {
   try {
-    const response = await fetch(`${WORDPRESS_BASE_URL}/wc/store/v1/products?per_page=12`, {
+    const response = await fetch(`${WOOCOMMERCE_PROXY_URL}?per_page=12`, {
       method: "GET",
       headers: {
         "Accept": "application/json"
