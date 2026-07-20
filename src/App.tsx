@@ -13,12 +13,16 @@ import WooCommerceShop from "./components/WooCommerceShop";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 import DetailModal from "./components/DetailModal";
+import CheckoutModal from "./components/CheckoutModal";
 import { fetchWordPressPosts, fetchWooCommerceProducts } from "./services/api";
 import { WPPost, WCProduct } from "./types";
-import { X, Play, Heart, Award, Trophy, MapPin, Sparkles, ShoppingCart, ArrowRight } from "lucide-react";
-import { motion } from "motion/react";
+import { useCart } from "./components/CartContext";
+import { X, Play, Heart, Award, Trophy, MapPin, Sparkles, ShoppingCart, ShoppingBag, ArrowRight, Minus, Plus, CreditCard } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
+  const { state: cartState, addItem, removeItem, updateQuantity, setOpen, totalItems, totalPrice, clearCart } = useCart();
+
   // Data lists
   const [posts, setPosts] = useState<WPPost[]>([]);
   const [products, setProducts] = useState<WCProduct[]>([]);
@@ -37,10 +41,7 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<WCProduct | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [journeyOpen, setJourneyOpen] = useState(false);
-
-  // Cart simulator state
-  const [cartItems, setCartItems] = useState<WCProduct[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
 
   // Join Journey Form State
@@ -89,15 +90,6 @@ export default function App() {
     );
   });
 
-  // Handle Cart Addition
-  const handleAddToCart = (prod: WCProduct) => {
-    setCartItems((prev) => [...prev, prod]);
-  };
-
-  const handleRemoveFromCart = (index: number) => {
-    setCartItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
   // Join the journey form submission
   const handleJourneySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,15 +125,15 @@ export default function App() {
       />
 
       {/* Floating Cart Badge / Drawer trigger */}
-      {cartItems.length > 0 && (
+      {totalItems > 0 && (
         <div className="fixed bottom-6 right-6 z-30">
           <button
-            onClick={() => setCartOpen(true)}
+            onClick={() => setOpen(true)}
             className="bg-[#EB5A12] text-white p-4 rounded-full shadow-2xl hover:bg-[#D04D0E] transition-all duration-200 transform hover:scale-110 flex items-center gap-2 select-none font-bold"
           >
             <ShoppingCart size={22} className="animate-bounce" />
-            <span className="bg-white text-[#EB5A12] px-2.5 py-0.5 rounded-full text-xs">
-              {cartItems.length}
+            <span className="bg-white text-[#EB5A12] px-2.5 py-0.5 rounded-full text-xs min-w-[24px]">
+              {totalItems}
             </span>
           </button>
         </div>
@@ -162,7 +154,6 @@ export default function App() {
         {/* GREEN HIGH-LIGHTS STRIP */}
         <GreenHighlights
           onCardClick={(pillarId) => {
-            // Broad search matching the clicked pillar
             if (pillarId === "learns") {
               setSelectedLoveCategory("HERITAGE");
             } else if (pillarId === "explores") {
@@ -226,13 +217,132 @@ export default function App() {
             setSelectedPost(null);
             setSelectedProduct(null);
           }}
-          onAddToCart={handleAddToCart}
         />
       )}
 
+      {/* CHECKOUT MODAL */}
+      {checkoutOpen && (
+        <CheckoutModal onClose={() => setCheckoutOpen(false)} />
+      )}
+
+      {/* SHOPPING BAG DRAWER MODAL */}
+      <AnimatePresence>
+        {cartState.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm flex justify-end"
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-brand-cream max-w-md w-full h-full shadow-2xl flex flex-col border-l border-[#F0EBE0] text-left"
+            >
+              {/* Drawer Header */}
+              <div className="p-6 border-b border-[#F0EBE0] flex justify-between items-center bg-white">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="text-[#EB5A12]" size={20} />
+                  <h3 className="font-display font-black text-lg text-[#0A2240]">YOUR BAG ({totalItems})</h3>
+                </div>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-[#0A2240] p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"
+                  title="Close Drawer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Cart Items List */}
+              <div className="flex-grow overflow-y-auto p-6 space-y-3">
+                {cartState.items.length === 0 ? (
+                  <div className="text-center py-12 text-[#8A9EB4] font-semibold text-sm">
+                    <ShoppingBag size={40} className="mx-auto mb-3 opacity-30" />
+                    Your bag is empty
+                  </div>
+                ) : (
+                  cartState.items.map((item) => (
+                    <div key={item.product.id} className="flex gap-4 p-4 bg-white rounded-2xl border border-[#F0EBE0] items-center">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#FAF6EC] flex-shrink-0">
+                        <img
+                          src={item.product.imageUrl}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="flex-grow min-w-0 space-y-0.5">
+                        <span className="text-[9px] font-black text-[#587760] uppercase tracking-wide block">
+                          {item.product.category}
+                        </span>
+                        <h4 className="font-display font-bold text-xs text-[#0A2240] truncate">{item.product.name}</h4>
+                        <p className="font-sans font-black text-sm text-[#EB5A12]">₹{item.product.price}</p>
+                      </div>
+                      {/* Quantity controls */}
+                      <div className="flex items-center border border-[#DCD3B5] rounded-lg overflow-hidden flex-shrink-0">
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          className="px-2 py-1 hover:bg-[#FAF6EC] text-[#0A2240] transition-colors cursor-pointer"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="px-2 py-1 text-xs font-bold text-[#0A2240] min-w-[22px] text-center border-x border-[#DCD3B5] select-none">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          className="px-2 py-1 hover:bg-[#FAF6EC] text-[#0A2240] transition-colors cursor-pointer"
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Drawer Checkout Footer */}
+              <div className="p-6 border-t border-[#F0EBE0] bg-white space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-sm text-[#0A2240]">Subtotal</span>
+                  <span className="text-xl font-black text-[#EB5A12]">₹{totalPrice}</span>
+                </div>
+
+                <div className="space-y-2">
+                  {/* In-app Checkout Button */}
+                  {cartState.items.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        setCheckoutOpen(true);
+                      }}
+                      className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 select-none cursor-pointer"
+                    >
+                      <CreditCard size={16} />
+                      PROCEED TO CHECKOUT
+                      <ArrowRight size={16} />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => { clearCart(); setOpen(false); }}
+                    className="w-full text-center text-xs text-gray-400 hover:text-red-500 font-semibold py-1 cursor-pointer"
+                  >
+                    Empty Bag
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* YOUTUBE WATCH VIDEO MODAL */}
       {videoOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative bg-black max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl border border-white/10 aspect-video flex flex-col">
             <button
               onClick={() => setVideoOpen(false)}
@@ -254,7 +364,7 @@ export default function App() {
 
       {/* JOIN THE JOURNEY MODAL FORM */}
       {journeyOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative bg-brand-cream max-w-md w-full rounded-3xl overflow-hidden shadow-2xl border border-[#F0EBE0] p-6 sm:p-8 flex flex-col text-left">
             <button
               onClick={() => setJourneyOpen(false)}
@@ -294,67 +404,29 @@ export default function App() {
                 <div className="space-y-4 pt-2">
                   <div>
                     <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Your Name</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Aarav Sharma"
-                      value={journeyForm.name}
-                      onChange={(e) => setJourneyForm({ ...journeyForm, name: e.target.value })}
-                      className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]"
-                    />
+                    <input type="text" required placeholder="e.g. Aarav Sharma" value={journeyForm.name} onChange={(e) => setJourneyForm({ ...journeyForm, name: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
                   </div>
-
                   <div>
                     <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Parent's / Your Email</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. aarav@gmail.com"
-                      value={journeyForm.email}
-                      onChange={(e) => setJourneyForm({ ...journeyForm, email: e.target.value })}
-                      className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]"
-                    />
+                    <input type="email" required placeholder="e.g. aarav@gmail.com" value={journeyForm.email} onChange={(e) => setJourneyForm({ ...journeyForm, email: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
                   </div>
-
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Age</label>
-                      <input
-                        type="number"
-                        placeholder="e.g. 12"
-                        value={journeyForm.age}
-                        onChange={(e) => setJourneyForm({ ...journeyForm, age: e.target.value })}
-                        className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]"
-                      />
+                      <input type="number" placeholder="e.g. 12" value={journeyForm.age} onChange={(e) => setJourneyForm({ ...journeyForm, age: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
                     </div>
                     <div>
                       <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">City</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Jaipur"
-                        value={journeyForm.city}
-                        onChange={(e) => setJourneyForm({ ...journeyForm, city: e.target.value })}
-                        className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]"
-                      />
+                      <input type="text" placeholder="e.g. Jaipur" value={journeyForm.city} onChange={(e) => setJourneyForm({ ...journeyForm, city: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
                     </div>
                   </div>
-
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block">What excites you most?</label>
                     <div className="flex flex-wrap gap-1.5 pt-1 select-none">
                       {["🎨 Local Art", "🕌 Historic Monuments", "⛰️ Mountains", "📚 Indian Freedom Fighters", "🧩 Fun Quizzes"].map((interest) => {
                         const active = journeyForm.interests.includes(interest);
                         return (
-                          <button
-                            type="button"
-                            key={interest}
-                            onClick={() => handleInterestToggle(interest)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
-                              active
-                                ? "bg-[#EB5A12] border-[#EB5A12] text-white"
-                                : "bg-white border-[#DCD3B5] text-[#0A2240] hover:bg-gray-50"
-                            }`}
-                          >
+                          <button type="button" key={interest} onClick={() => handleInterestToggle(interest)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${active ? "bg-[#EB5A12] border-[#EB5A12] text-white" : "bg-white border-[#DCD3B5] text-[#0A2240] hover:bg-gray-50"}`}>
                             {interest}
                           </button>
                         );
@@ -362,91 +434,12 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-4"
-                >
+                <button type="submit" className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-4">
                   <Trophy size={16} />
                   CLAIM BUDDY PASSPORT
                 </button>
               </form>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* SHOPPING BAG DRAWER MODAL */}
-      {cartOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm flex justify-end">
-          <div className="bg-brand-cream max-w-md w-full h-full shadow-2xl flex flex-col animate-slide-left border-l border-[#F0EBE0] text-left">
-            
-            {/* Drawer Header */}
-            <div className="p-6 border-b border-[#F0EBE0] flex justify-between items-center bg-white">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="text-[#EB5A12]" size={20} />
-                <h3 className="font-display font-black text-lg text-[#0A2240]">YOUR SHOPPING BAG</h3>
-              </div>
-              <button
-                onClick={() => setCartOpen(false)}
-                className="text-[#0A2240] p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"
-                title="Close Drawer"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Cart Items List */}
-            <div className="flex-grow overflow-y-auto p-6 space-y-4">
-              {cartItems.map((item, index) => (
-                <div key={`${item.id}-${index}`} className="flex gap-4 p-4 bg-white rounded-2xl border border-[#F0EBE0] items-center relative group">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#FAF6EC] flex-shrink-0">
-                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="flex-grow space-y-1">
-                    <span className="text-[10px] font-black text-[#587760] uppercase tracking-wide block">{item.category}</span>
-                    <h4 className="font-display font-bold text-xs text-[#0A2240] line-clamp-1">{item.name}</h4>
-                    <p className="font-sans font-black text-sm text-[#EB5A12]">₹{item.price}</p>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveFromCart(index)}
-                    className="text-gray-400 hover:text-red-500 text-xs font-bold uppercase transition-colors"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Drawer Checkout Footer */}
-            <div className="p-6 border-t border-[#F0EBE0] bg-white space-y-4">
-              <div className="flex justify-between items-center text-md font-bold text-[#0A2240]">
-                <span>TOTAL:</span>
-                <span className="text-xl font-black text-[#EB5A12]">
-                  ₹{cartItems.reduce((acc, curr) => acc + parseFloat(curr.price), 0)}
-                </span>
-              </div>
-              
-              <div className="space-y-2">
-                {/* Redirecting directly to Pakka Patriot checkout */}
-                <a
-                  href="https://pakkapatriot.com/cart"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer"
-                >
-                  SECURE CHECKOUT ON PAKKAPATRIOT
-                  <ArrowRight size={16} />
-                </a>
-                <button
-                  onClick={() => setCartItems([])}
-                  className="w-full text-center text-xs text-gray-400 hover:text-[#EB5A12] font-semibold py-2 cursor-pointer"
-                >
-                  Empty Bag
-                </button>
-              </div>
-            </div>
-
           </div>
         </div>
       )}

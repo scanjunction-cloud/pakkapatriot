@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WPPost, WCProduct } from "../types";
+import { WPPost, WCProduct, WooCart, CheckoutFormData, OrderResult } from "../types";
 
-// High fidelity mock data matching the screenshot and real Pakka Patriot products
+// … all the fallback data, fetchWordPressPosts, fetchWooCommerceProducts etc remain the same as before …
+
 export const FALLBACK_POSTS: WPPost[] = [
   {
     id: 101,
@@ -89,16 +90,16 @@ export const FALLBACK_POSTS: WPPost[] = [
 
 export const FALLBACK_PRODUCTS: WCProduct[] = [
   {
-    id: 201,
-    name: "Pakka Patriot Signature T-Shirt",
-    description: "Ultra-soft 100% organic cotton graphic t-shirt featuring the iconic Pakka Patriot emblem. Breathe easy, live proudly.",
-    shortDescription: "Premium organic cotton tee with hand-printed PP logo.",
-    price: "799",
-    regularPrice: "999",
-    onSale: true,
+    id: 10382,
+    name: "Chanakya T-Shirt",
+    description: "Premium quality T-Shirt featuring Chanakya — the ancient Indian teacher, philosopher, and royal advisor. Wear the wisdom of the ages.",
+    shortDescription: "Premium cotton tee with Chanakya portrait print.",
+    price: "350",
+    regularPrice: "350",
+    onSale: false,
     imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop",
     category: "T-Shirts",
-    link: "https://pakkapatriot.com/product/signature-t-shirt",
+    link: "https://pakkapatriot.com/product/chanakya-t-shirt",
     inStock: true
   },
   {
@@ -196,7 +197,6 @@ export const FALLBACK_PRODUCTS: WCProduct[] = [
 
 // Base URLs
 const WORDPRESS_BASE_URL = "https://pakkapatriot.com/wp-json";
-// Same-origin proxy avoids CORS issues — Vite proxy in dev, Vercel serverless function in production
 const WOOCOMMERCE_PROXY_URL = "/api/woocommerce";
 
 /**
@@ -221,9 +221,7 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
       return FALLBACK_POSTS;
     }
 
-    // Map WP REST API fields to our clean WPPost interface
     return data.map((post: any) => {
-      // Extract featured image from embedded block
       let featuredImage = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop";
       try {
         if (post._embedded && post._embedded["wp:featuredmedia"] && post._embedded["wp:featuredmedia"][0]) {
@@ -234,7 +232,6 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
         console.warn("Could not parse featured media for post", post.id, err);
       }
 
-      // Try to extract category
       let category = "STORIES";
       try {
         if (post._embedded && post._embedded["wp:term"] && post._embedded["wp:term"][0]) {
@@ -244,7 +241,6 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
           }
         }
       } catch (err) {
-        // Fallback matching title categories
         const titleLower = post.title.rendered.toLowerCase();
         if (titleLower.includes("art") || titleLower.includes("tradition")) category = "TRADITIONS";
         else if (titleLower.includes("valley") || titleLower.includes("place") || titleLower.includes("temple")) category = "PLACES";
@@ -252,7 +248,6 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
         else if (titleLower.includes("kalam") || titleLower.includes("people") || titleLower.includes("dreamer")) category = "PEOPLE";
       }
 
-      // Author name
       let authorName = "Pakka Patriot";
       try {
         if (post._embedded && post._embedded["author"] && post._embedded["author"][0]) {
@@ -260,7 +255,6 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
         }
       } catch (_) {}
 
-      // Calculate simple read time based on word count
       const wordCount = post.content?.rendered ? post.content.rendered.split(/\s+/).length : 500;
       const readTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
 
@@ -279,20 +273,17 @@ export async function fetchWordPressPosts(): Promise<WPPost[]> {
       };
     });
   } catch (error) {
-    console.warn("WordPress fetch failed (likely CORS or Network), using beautiful fallback data:", error);
+    console.warn("WordPress fetch failed, using fallback data:", error);
     return FALLBACK_POSTS;
   }
 }
 
 /**
  * Fetch latest products from pakkapatriot.com WooCommerce Store API
- * Uses a same-origin proxy to avoid CORS issues entirely.
- * In dev: Vite proxy rewrites the request to WordPress.
- * In production: Vercel serverless function proxies the request.
  */
 export async function fetchWooCommerceProducts(): Promise<WCProduct[]> {
   try {
-    const response = await fetch(`${WOOCOMMERCE_PROXY_URL}?per_page=12`, {
+    const response = await fetch(`${WOOCOMMERCE_PROXY_URL}/products?per_page=12`, {
       method: "GET",
       headers: {
         "Accept": "application/json"
@@ -310,7 +301,6 @@ export async function fetchWooCommerceProducts(): Promise<WCProduct[]> {
     }
 
     return data.map((product: any) => {
-      // Handle price formatting (WooCommerce Store API returns prices as integer strings/objects, e.g., "79900" for 799.00)
       let price = "0";
       let regularPrice = "0";
       try {
@@ -343,16 +333,138 @@ export async function fetchWooCommerceProducts(): Promise<WCProduct[]> {
       };
     });
   } catch (error) {
-    console.warn("WooCommerce fetch failed (likely CORS or Network), using beautiful fallback data:", error);
+    console.warn("WooCommerce fetch failed, using beautiful fallback data:", error);
     return FALLBACK_PRODUCTS;
   }
 }
 
-// Helper: Strip HTML tags
+/* ─── CART API ──────────────────────────────────────────────────────────── */
+
+/** Get the current Cart-Token from localStorage */
+function getCartToken(): string | null {
+  try {
+    return localStorage.getItem("wc_cart_token");
+  } catch {
+    return null;
+  }
+}
+
+/** Store the Cart-Token from response headers */
+function storeCartToken(response: Response): void {
+  const token = response.headers.get("Cart-Token");
+  if (token) {
+    try {
+      localStorage.setItem("wc_cart_token", token);
+    } catch {}
+  }
+}
+
+/** Add a product to the WooCommerce cart */
+export async function apiCartAdd(productId: number, quantity: number = 1) {
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getCartToken() ? { "Cart-Token": getCartToken()! } : {}),
+    },
+    body: JSON.stringify({ id: productId, quantity }),
+  });
+  storeCartToken(res);
+  return res.json();
+}
+
+/** Remove an item from the cart by its key */
+export async function apiCartRemove(key: string) {
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/remove`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getCartToken() ? { "Cart-Token": getCartToken()! } : {}),
+    },
+    body: JSON.stringify({ key }),
+  });
+  storeCartToken(res);
+  return res.json();
+}
+
+/** Update item quantity */
+export async function apiCartUpdate(key: string, quantity: number) {
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/update`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getCartToken() ? { "Cart-Token": getCartToken()! } : {}),
+    },
+    body: JSON.stringify({ key, quantity }),
+  });
+  storeCartToken(res);
+  return res.json();
+}
+
+/** Get current cart */
+export async function apiCartGet(): Promise<WooCart | null> {
+  const token = getCartToken();
+  if (!token) return null;
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart`, {
+    headers: {
+      Accept: "application/json",
+      "Cart-Token": token,
+    },
+  });
+  if (!res.ok) return null;
+  storeCartToken(res);
+  return res.json();
+}
+
+/** Process checkout */
+export async function apiCheckout(data: CheckoutFormData, cartToken?: string) {
+  const token = cartToken || getCartToken();
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/checkout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "Cart-Token": token } : {}),
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+/** Create order via REST API (line_items + customer data) */
+export async function apiCreateOrder(payload: {
+  line_items: Array<{
+    product_id: number;
+    quantity: number;
+    name?: string;
+    price?: string;
+    total?: string;
+    subtotal?: string;
+  }>;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address_1: string;
+  address_2: string;
+  city: string;
+  state: string;
+  postcode: string;
+  country: string;
+  customer_note?: string;
+}) {
+  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
+/* ─── Helpers ──────────────────────────────────────────────────────────── */
+
 function stripHtml(html: string): string {
   if (!html) return "";
   const clean = html.replace(/<\/?[^>]+(>|$)/g, "");
-  // Trim and limit length to ~120 characters for clean excerpts
   const trimmed = clean.trim().replace(/\s+/g, " ");
   if (trimmed.length > 140) {
     return trimmed.slice(0, 137) + "...";
@@ -360,7 +472,6 @@ function stripHtml(html: string): string {
   return trimmed;
 }
 
-// Helper: Decode basic HTML entities
 function decodeHtmlEntities(str: string): string {
   if (!str) return "";
   return str

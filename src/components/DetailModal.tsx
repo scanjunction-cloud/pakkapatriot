@@ -3,31 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { X, Calendar, User, Clock, ArrowRight, ExternalLink, ShoppingBag, Check } from "lucide-react";
+import { X, Calendar, User, Clock, ArrowRight, ExternalLink, ShoppingBag, Check, Minus, Plus } from "lucide-react";
 import { WPPost, WCProduct } from "../types";
 import { getCategoryBadgeClasses } from "./LatestStories";
 import React, { useState } from "react";
+import { useCart } from "./CartContext";
 
 interface DetailModalProps {
   post: WPPost | null;
   product: WCProduct | null;
   onClose: () => void;
-  onAddToCart: (product: WCProduct) => void;
 }
 
-export default function DetailModal({ post, product, onClose, onAddToCart }: DetailModalProps) {
+export default function DetailModal({ post, product, onClose }: DetailModalProps) {
+  const { addItem, setOpen } = useCart();
   const [addedToCart, setAddedToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   if (!post && !product) return null;
 
   const handleAddToCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (product) {
-      onAddToCart(product);
+      addItem(product, quantity);
       setAddedToCart(true);
       setTimeout(() => {
         setAddedToCart(false);
-      }, 2000);
+      }, 2500);
+    }
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (product) {
+      addItem(product, quantity);
+      setOpen(true);
+      onClose();
     }
   };
 
@@ -183,10 +194,33 @@ export default function DetailModal({ post, product, onClose, onAddToCart }: Det
                   </p>
                 </div>
 
+                {/* Quantity selector */}
+                <div className="flex items-center gap-3 pt-2 pb-1">
+                  <span className="text-xs font-black text-[#0A2240] uppercase tracking-wider">Qty:</span>
+                  <div className="flex items-center border border-[#DCD3B5] rounded-xl overflow-hidden bg-white">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="px-3 py-2 text-sm font-bold hover:bg-[#FAF6EC] text-[#0A2240] transition-colors cursor-pointer"
+                      disabled={quantity <= 1}
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="px-4 py-2 text-sm font-black text-[#0A2240] min-w-[32px] text-center border-x border-[#DCD3B5] select-none">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="px-3 py-2 text-sm font-bold hover:bg-[#FAF6EC] text-[#0A2240] transition-colors cursor-pointer"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                </div>
+
                 {/* Checkout CTA row */}
                 <div className="space-y-3 pt-4 border-t border-[#F0EBE0]">
                   <div className="flex gap-2 w-full">
-                    {/* Simulator Add-to-cart */}
+                    {/* Add to Cart */}
                     <button
                       onClick={handleAddToCartClick}
                       className={`flex-grow py-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer border ${
@@ -198,26 +232,24 @@ export default function DetailModal({ post, product, onClose, onAddToCart }: Det
                       {addedToCart ? (
                         <>
                           <Check size={16} />
-                          ADDED!
+                          ADDED ×{quantity}!
                         </>
                       ) : (
                         <>
                           <ShoppingBag size={16} />
-                          ADD TO BAG
+                          ADD TO BAG — ₹{parseInt(product.price) * quantity}
                         </>
                       )}
                     </button>
 
-                    {/* Real WP store checkout redirect */}
-                    <a
-                      href={product.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    {/* Buy Now — adds to cart & opens drawer */}
+                    <button
+                      onClick={handleBuyNow}
                       className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer flex-shrink-0"
                     >
                       BUY NOW
                       <ArrowRight size={16} />
-                    </a>
+                    </button>
                   </div>
                   
                   <span className="text-[10px] text-center block text-[#8A9EB4] font-bold uppercase tracking-wider font-sans">
