@@ -2,17 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Vercel serverless function — proxies WooCommerce Store API requests
- * so the frontend fetches from the same origin (no CORS).
+ * Vercel serverless function (catch-all) — proxies WooCommerce Store API
+ * and REST API requests so the frontend fetches from the same origin (no CORS).
  *
- * Supports:
- *   GET  /api/woocommerce?per_page=,…          → List products
- *   GET  /api/woocommerce/cart                 → Get current cart
- *   POST /api/woocommerce/cart/add             → Add item
- *   POST /api/woocommerce/cart/remove          → Remove item
- *   POST /api/woocommerce/cart/update          → Update item quantity
- *   POST /api/woocommerce/checkout             → Process checkout & return payment URL
- *   POST /api/woocommerce/orders               → Create order via REST API (requires auth)
+ * The [...slug] pattern handles all sub-paths under /api/woocommerce/:
+ *   /api/woocommerce         → rewrite to /api/woocommerce/home  → slug = ['home']
+ *   /api/woocommerce/products → slug = ['products']
+ *   /api/woocommerce/cart     → slug = ['cart']
+ *   /api/woocommerce/cart/add → slug = ['cart', 'add']
+ *   /api/woocommerce/orders   → slug = ['orders']
+ *   /api/woocommerce/checkout → slug = ['checkout']
  */
 
 const WOOCOMMERCE_STORE_API  = "https://pakkapatriot.com/wp-json/wc/store/v1";
@@ -29,53 +28,64 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
-  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  // Get the sub-path from the catch-all slug
+  // slug = [] or undefined for /api/woocommerce (via rewrite to /home)
+  // slug = ['products'] for /api/woocommerce/products
+  const slug = req.query.slug || [];
+  // Normalise: filter empty strings from trailing slash
+  const cleanSlug = Array.isArray(slug)
+    ? slug.filter((s) => s !== "")
+    : [slug].filter((s) => s !== "");
+  const subPath = cleanSlug.length > 0 ? "/" + cleanSlug.join("/") : "";
+
+  // Treat "/home" as the base path (used when vercel.json rewrites /api/woocommerce to /api/woocommerce/home)
+  const route = subPath === "/home" ? "" : subPath;
 
   try {
     // ── Products (GET) ─────────────────────────────────────────────
-    if (pathname === "/api/woocommerce" || pathname === "/api/woocommerce/" || pathname === "/api/woocommerce/products") {
+    if (route === "" || route === "/products") {
       if (req.method !== "GET") return methodNotAllowed(res);
       return await proxyProducts(req, res);
     }
 
     // ── Cart: GET ──────────────────────────────────────────────────
-    if (pathname === "/api/woocommerce/cart") {
+    if (route === "/cart") {
       if (req.method === "GET") return await proxyCartGet(req, res);
       return methodNotAllowed(res);
     }
 
     // ── Cart: Add Item ─────────────────────────────────────────────
-    if (pathname === "/api/woocommerce/cart/add") {
+    if (route === "/cart/add") {
       if (req.method !== "POST") return methodNotAllowed(res);
       return await proxyCartAdd(req, res);
     }
 
     // ── Cart: Remove Item ──────────────────────────────────────────
-    if (pathname === "/api/woocommerce/cart/remove") {
+    if (route === "/cart/remove") {
       if (req.method !== "POST") return methodNotAllowed(res);
       return await proxyCartRemove(req, res);
     }
 
     // ── Cart: Update Item ──────────────────────────────────────────
-    if (pathname === "/api/woocommerce/cart/update") {
+    if (route === "/cart/update") {
       if (req.method !== "POST") return methodNotAllowed(res);
       return await proxyCartUpdate(req, res);
     }
 
     // ── Checkout (Store API) ───────────────────────────────────────
-    if (pathname === "/api/woocommerce/checkout") {
+    if (route === "/checkout") {
       if (req.method !== "POST") return methodNotAllowed(res);
       return await proxyCheckout(req, res);
     }
 
     // ── Create Order (REST API — requires env creds) ───────────────
-    if (pathname === "/api/woocommerce/orders") {
+    if (route === "/orders") {
       if (req.method !== "POST") return methodNotAllowed(res);
       return await createOrderREST(req, res);
     }
 
     // Fallback — 404
-    return res.status(404).json({ error: "Unknown endpoint" });
+    return res.status(404).json({ error: "Unknown endpoint", route });
   } catch (error) {
     console.error("WooCommerce proxy error:", error);
     return res.status(502).json({ error: "Failed to fetch from WooCommerce API" });
