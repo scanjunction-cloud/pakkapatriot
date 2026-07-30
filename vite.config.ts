@@ -17,22 +17,16 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
-      // Order matters: more specific routes first
       proxy: {
-        // REST API for order creation (requires WooCommerce API credentials)
-        '/api/woocommerce/orders': {
-          target: 'https://pakkapatriot.com',
+        // Proxy storage (images) to the local Laravel backend
+        '/storage': {
+          target: 'http://localhost:8000',
           changeOrigin: true,
-          auth: process.env.WOOCOMMERCE_CONSUMER_KEY && process.env.WOOCOMMERCE_CONSUMER_SECRET
-            ? `${process.env.WOOCOMMERCE_CONSUMER_KEY}:${process.env.WOOCOMMERCE_CONSUMER_SECRET}`
-            : undefined,
-          rewrite: (pathname) => pathname.replace(/^\/api\/woocommerce/, '/wp-json/wc/v3'),
         },
-        // Store API for products, cart, checkout
-        '/api/woocommerce': {
-          target: 'https://pakkapatriot.com',
+        // Proxy /api/* to the local Laravel backend (run: php artisan serve --port=8000)
+        '/api': {
+          target: 'http://localhost:8000',
           changeOrigin: true,
-          rewrite: (pathname) => pathname.replace(/^\/api\/woocommerce/, '/wp-json/wc/store/v1'),
         },
       },
     },

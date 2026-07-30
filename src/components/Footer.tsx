@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Link, useNavigate } from "react-router-dom";
 import { Instagram, Youtube, Facebook, ArrowUp } from "lucide-react";
+import ppLogo from "../assets/images/pp_logo.png";
 
 interface FooterProps {
   onTabChange: (tab: string) => void;
@@ -11,13 +13,31 @@ interface FooterProps {
 }
 
 export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps) {
+  const navigate = useNavigate();
   
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleTabWithNav = (tab: string) => {
+    if (tab === "stories") {
+      navigate("/stories");
+      return;
+    }
+    if (tab === "explore") {
+      navigate("/explore");
+      return;
+    }
+    onTabChange(tab);
+    navigate("/");
+    setTimeout(() => {
+      const el = document.getElementById(tab);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   return (
-    <footer className="bg-[#0A1A2E] text-[#B5CADF] border-t-4 border-[#EB5A12] pt-16 pb-8 relative overflow-hidden select-none">
+    <footer className="bg-[#0A1A2E] text-[#B5CADF] border-t-4 border-[#F6B828] pt-16 pb-8 relative overflow-hidden select-none">
       
       {/* Decorative vector arches matching Indian monument architecture in BG */}
       <div className="absolute top-0 right-0 w-80 h-80 border-t border-r border-white/5 rounded-tr-full pointer-events-none -translate-y-20 translate-x-20" />
@@ -28,20 +48,8 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
           
           {/* Column 1: Brand Intro (4 cols) */}
           <div className="lg:col-span-4 flex flex-col items-start text-left space-y-5">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={handleScrollToTop}>
-              <svg className="w-10 h-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="46" fill="white" stroke="#0A2240" strokeWidth="4" />
-                <path d="M32 30 H55 C65 30 68 38 62 43 C56 48 50 48 50 48 M32 30 V72" stroke="#0A2240" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M42 40 H65 C75 40 78 48 72 53 C66 58 60 58 60 58 M42 40 V82" stroke="#EB5A12" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex flex-col">
-                <span className="font-display font-black text-lg tracking-wider text-white">
-                  PAKKA<span className="text-[#EB5A12] ml-0.5">PATRIOT</span>
-                </span>
-                <span className="text-[9px] font-black text-[#EB5A12] tracking-[0.16em] uppercase">
-                  Know India. <span className="text-white">Be India.</span>
-                </span>
-              </div>
+            <div className="flex items-center cursor-pointer" onClick={handleScrollToTop}>
+              <img src={ppLogo} alt="Pakka Patriot" className="w-16 h-16 object-contain" />
             </div>
 
             <p className="text-sm text-[#8EA6C0] font-medium leading-relaxed max-w-xs">
@@ -50,7 +58,7 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
 
             <button
               onClick={onJoinJourneyClick}
-              className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white font-bold text-xs px-6 py-3 rounded-full transition-all duration-200 shadow hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
+              className="bg-[#F6B828] hover:bg-[#DAA520] text-white font-bold text-xs px-6 py-3 rounded-full transition-all duration-200 shadow hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
             >
               Join the Journey
             </button>
@@ -63,27 +71,27 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
             </h4>
             <ul className="space-y-2 text-sm font-semibold">
               <li>
-                <button onClick={() => { onTabChange("stories"); document.getElementById("latest-stories")?.scrollIntoView({ behavior: "smooth" }); }} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => handleTabWithNav("stories")} className="hover:text-white transition-colors cursor-pointer">
                   Stories
                 </button>
               </li>
               <li>
-                <button onClick={() => { onTabChange("explore"); document.getElementById("latest-stories")?.scrollIntoView({ behavior: "smooth" }); }} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => handleTabWithNav("explore")} className="hover:text-white transition-colors cursor-pointer">
                   Explore
                 </button>
               </li>
               <li>
-                <button onClick={() => { onTabChange("traditions"); document.getElementById("latest-stories")?.scrollIntoView({ behavior: "smooth" }); }} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => handleTabWithNav("traditions")} className="hover:text-white transition-colors cursor-pointer">
                   Traditions
                 </button>
               </li>
               <li>
-                <button onClick={() => { onTabChange("people"); document.getElementById("latest-stories")?.scrollIntoView({ behavior: "smooth" }); }} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => handleTabWithNav("people")} className="hover:text-white transition-colors cursor-pointer">
                   People
                 </button>
               </li>
               <li>
-                <button onClick={() => { onTabChange("funzone"); document.getElementById("latest-stories")?.scrollIntoView({ behavior: "smooth" }); }} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => handleTabWithNav("funzone")} className="hover:text-white transition-colors cursor-pointer">
                   Fun Zone
                 </button>
               </li>
@@ -97,14 +105,14 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
             </h4>
             <ul className="space-y-2 text-sm font-semibold">
               <li>
-                <button onClick={() => onTabChange("about")} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/about" className="hover:text-white transition-colors">
                   About Us
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => onTabChange("mission")} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/about" className="hover:text-white transition-colors">
                   Our Mission
-                </button>
+                </Link>
               </li>
               <li>
                 <button onClick={onJoinJourneyClick} className="hover:text-white transition-colors cursor-pointer">
@@ -174,7 +182,7 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
               <p className="font-brush text-xl tracking-wide select-none">
                 Be Informed. <br />
                 Be Inspired. <br />
-                <span className="text-[#EB5A12]">Be India. 🧡</span>
+                <span className="text-[#F6B828]">Be India. 🧡</span>
               </p>
             </div>
           </div>
@@ -189,7 +197,7 @@ export default function Footer({ onTabChange, onJoinJourneyClick }: FooterProps)
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
             <button
               onClick={handleScrollToTop}
-              className="flex items-center gap-1.5 text-[#EB5A12] hover:text-white transition-colors font-bold cursor-pointer"
+              className="flex items-center gap-1.5 text-[#F6B828] hover:text-white transition-colors font-bold cursor-pointer"
             >
               Back to top
               <ArrowUp size={14} />

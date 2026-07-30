@@ -192,153 +192,146 @@ export const FALLBACK_PRODUCTS: WCProduct[] = [
     category: "Accessories",
     link: "https://pakkapatriot.com/product/brass-bookmark",
     inStock: true
+  },
+  {
+    id: 209,
+    name: "Banarasi Silk Stole",
+    description: "Handwoven pure silk stole with intricate zari work by the weavers of Varanasi.",
+    shortDescription: "Luxurious handwoven silk with traditional zari borders.",
+    price: "1,999",
+    regularPrice: "2,499",
+    onSale: true,
+    imageUrl: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?q=80&w=600&auto=format&fit=crop",
+    category: "MADE IN INDIA",
+    link: "https://pakkapatriot.com/product/banarasi-silk-stole",
+    inStock: true
+  },
+  {
+    id: 210,
+    name: "Channapatna Toy Set",
+    description: "Set of 5 eco-friendly lacquer turned wooden toys crafted by Karnataka artisans.",
+    shortDescription: "Non-toxic natural toy set for creative learning.",
+    price: "849",
+    regularPrice: "849",
+    onSale: false,
+    imageUrl: "https://images.unsplash.com/photo-1612450632009-f41d7f6b57b8?q=80&w=600&auto=format&fit=crop",
+    category: "MADE IN INDIA",
+    link: "https://pakkapatriot.com/product/channapatna-toy-set",
+    inStock: true
+  },
+  {
+    id: 211,
+    name: "Madhubani Tote Bag",
+    description: "Organic cotton tote bag hand-painted with natural-dye Madhubani art motifs.",
+    shortDescription: "Eco-friendly hand-painted cotton tote.",
+    price: "599",
+    regularPrice: "799",
+    onSale: true,
+    imageUrl: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop",
+    category: "MADE IN INDIA",
+    link: "https://pakkapatriot.com/product/madhubani-tote",
+    inStock: true
+  },
+  {
+    id: 212,
+    name: "Sanganeri Print Bedsheet",
+    description: "Hand-block-printed cotton bedsheet dyed with natural vegetable colors from Rajasthan.",
+    shortDescription: "Pure cotton block-print double bedsheet.",
+    price: "1,299",
+    regularPrice: "1,599",
+    onSale: true,
+    imageUrl: "https://images.unsplash.com/photo-1522771739016-7c97b2a2b1c3?q=80&w=600&auto=format&fit=crop",
+    category: "MADE IN INDIA",
+    link: "https://pakkapatriot.com/product/sanganeri-bedsheet",
+    inStock: true
   }
 ];
 
-// Base URLs
-const WORDPRESS_BASE_URL = "https://pakkapatriot.com/wp-json";
-const WOOCOMMERCE_PROXY_URL = "/api/woocommerce";
+// Base URL for the local Laravel backend
+const LARAVEL_API_URL = "/api";
 
 /**
- * Fetch latest stories/posts from pakkapatriot.com
+ * Fetch latest stories/posts from the Laravel backend.
  */
 export async function fetchWordPressPosts(): Promise<WPPost[]> {
   try {
-    const response = await fetch(`${WORDPRESS_BASE_URL}/wp/v2/posts?_embed=1&per_page=6`, {
+    const response = await fetch(`${LARAVEL_API_URL}/blogs?per_page=12`, {
       method: "GET",
-      headers: {
-        "Accept": "application/json"
-      }
+      headers: { "Accept": "application/json" }
     });
 
     if (!response.ok) {
-      throw new Error(`WordPress API returned status ${response.status}`);
+      throw new Error(`Laravel API returned status ${response.status}`);
     }
 
-    const data = await response.json();
+    const json = await response.json();
+    const posts = json.data ?? [];
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(posts) || posts.length === 0) {
       return FALLBACK_POSTS;
     }
 
-    return data.map((post: any) => {
-      let featuredImage = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop";
-      try {
-        if (post._embedded && post._embedded["wp:featuredmedia"] && post._embedded["wp:featuredmedia"][0]) {
-          const media = post._embedded["wp:featuredmedia"][0];
-          featuredImage = media.source_url || media.media_details?.sizes?.large?.source_url || featuredImage;
-        }
-      } catch (err) {
-        console.warn("Could not parse featured media for post", post.id, err);
-      }
-
-      let category = "STORIES";
-      try {
-        if (post._embedded && post._embedded["wp:term"] && post._embedded["wp:term"][0]) {
-          const categoriesList = post._embedded["wp:term"][0];
-          if (categoriesList.length > 0) {
-            category = categoriesList[0].name.toUpperCase();
-          }
-        }
-      } catch (err) {
-        const titleLower = post.title.rendered.toLowerCase();
-        if (titleLower.includes("art") || titleLower.includes("tradition")) category = "TRADITIONS";
-        else if (titleLower.includes("valley") || titleLower.includes("place") || titleLower.includes("temple")) category = "PLACES";
-        else if (titleLower.includes("library") || titleLower.includes("history") || titleLower.includes("heritage")) category = "HERITAGE";
-        else if (titleLower.includes("kalam") || titleLower.includes("people") || titleLower.includes("dreamer")) category = "PEOPLE";
-      }
-
-      let authorName = "Pakka Patriot";
-      try {
-        if (post._embedded && post._embedded["author"] && post._embedded["author"][0]) {
-          authorName = post._embedded["author"][0].name || authorName;
-        }
-      } catch (_) {}
-
-      const wordCount = post.content?.rendered ? post.content.rendered.split(/\s+/).length : 500;
-      const readTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
-
-      return {
-        id: post.id,
-        title: post.title?.rendered ? decodeHtmlEntities(post.title.rendered) : "Untitled Post",
-        excerpt: post.excerpt?.rendered ? stripHtml(post.excerpt.rendered) : "Explore the stories of India.",
-        content: post.content?.rendered || "",
-        date: post.date ? post.date.split("T")[0] : new Date().toISOString().split("T")[0],
-        featuredImage,
-        category,
-        slug: post.slug || `post-${post.id}`,
-        link: post.link || `https://pakkapatriot.com/${post.slug}`,
-        authorName,
-        readTime
-      };
-    });
+    return posts.map((post: any) => ({
+      id: post.id,
+      title: post.title || "Untitled Post",
+      excerpt: post.excerpt || "Explore the stories of India.",
+      content: post.content || "",
+      date: post.date || new Date().toISOString().split("T")[0],
+      featuredImage: post.featured_image || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop",
+      category: post.category || "STORIES",
+      slug: post.slug || `post-${post.id}`,
+      link: post.link || `/blog/${post.slug}`,
+      authorName: post.author_name || "Pakka Patriot",
+      readTime: post.read_time || "3 min read"
+    }));
   } catch (error) {
-    console.warn("WordPress fetch failed, using fallback data:", error);
+    console.warn("Laravel blog fetch failed, using fallback data:", error);
     return FALLBACK_POSTS;
   }
 }
 
 /**
- * Fetch latest products from pakkapatriot.com WooCommerce Store API
+ * Fetch products from the Laravel backend (imported from WooCommerce).
  */
 export async function fetchWooCommerceProducts(): Promise<WCProduct[]> {
   try {
-    const response = await fetch(`${WOOCOMMERCE_PROXY_URL}/products?per_page=12`, {
+    const response = await fetch(`${LARAVEL_API_URL}/products?per_page=50`, {
       method: "GET",
-      headers: {
-        "Accept": "application/json"
-      }
+      headers: { "Accept": "application/json" }
     });
 
     if (!response.ok) {
-      throw new Error(`WooCommerce Store API returned status ${response.status}`);
+      throw new Error(`Laravel API returned status ${response.status}`);
     }
 
-    const data = await response.json();
+    const json = await response.json();
+    const products = json.data ?? [];
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(products) || products.length === 0) {
       return FALLBACK_PRODUCTS;
     }
 
-    return data.map((product: any) => {
-      let price = "0";
-      let regularPrice = "0";
-      try {
-        if (product.prices) {
-          const rawPrice = product.prices.price;
-          const rawRegular = product.prices.regular_price;
-          price = (parseFloat(rawPrice) / Math.pow(10, product.prices.currency_minor_unit || 2)).toFixed(0);
-          regularPrice = (parseFloat(rawRegular) / Math.pow(10, product.prices.currency_minor_unit || 2)).toFixed(0);
-        } else {
-          price = product.price || "0";
-          regularPrice = product.regular_price || price;
-        }
-      } catch (err) {
-        price = "499";
-        regularPrice = "499";
-      }
-
-      return {
-        id: product.id,
-        name: product.name ? decodeHtmlEntities(product.name) : "Patriot Merch",
-        description: product.description ? stripHtml(product.description) : "",
-        shortDescription: product.short_description ? stripHtml(product.short_description) : "",
-        price,
-        regularPrice,
-        onSale: product.on_sale || false,
-        imageUrl: product.images && product.images[0]?.src ? product.images[0].src : "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop",
-        category: product.categories && product.categories[0]?.name ? product.categories[0].name : "Accessories",
-        link: product.permalink || `https://pakkapatriot.com/product/${product.slug || product.id}`,
-        inStock: product.is_in_stock ?? true
-      };
-    });
+    return products.map((product: any) => ({
+      id: product.id,
+      name: product.name || "Patriot Merch",
+      description: product.description || "",
+      shortDescription: product.short_description || "",
+      price: product.price || "0",
+      regularPrice: product.regular_price || product.price || "0",
+      salePrice: product.sale_price || null,
+      onSale: product.on_sale || false,
+      imageUrl: product.image_url || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop",
+      category: product.category || "Accessories",
+      link: product.slug ? `/product/${product.slug}` : `#`,
+      inStock: product.in_stock ?? true
+    }));
   } catch (error) {
-    console.warn("WooCommerce fetch failed, using beautiful fallback data:", error);
+    console.warn("Laravel product fetch failed, using fallback data:", error);
     return FALLBACK_PRODUCTS;
   }
 }
 
-/* ─── CART API ──────────────────────────────────────────────────────────── */
+/* ─── CART API (uses local Laravel backend) ─────────────────────────────── */
 
 /** Get the current Cart-Token from localStorage */
 function getCartToken(): string | null {
@@ -359,9 +352,9 @@ function storeCartToken(response: Response): void {
   }
 }
 
-/** Add a product to the WooCommerce cart */
+/** Add a product to the cart */
 export async function apiCartAdd(productId: number, quantity: number = 1) {
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/add`, {
+  const res = await fetch(`${LARAVEL_API_URL}/cart/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -375,7 +368,7 @@ export async function apiCartAdd(productId: number, quantity: number = 1) {
 
 /** Remove an item from the cart by its key */
 export async function apiCartRemove(key: string) {
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/remove`, {
+  const res = await fetch(`${LARAVEL_API_URL}/cart/remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -389,7 +382,7 @@ export async function apiCartRemove(key: string) {
 
 /** Update item quantity */
 export async function apiCartUpdate(key: string, quantity: number) {
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart/update`, {
+  const res = await fetch(`${LARAVEL_API_URL}/cart/update`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -405,7 +398,7 @@ export async function apiCartUpdate(key: string, quantity: number) {
 export async function apiCartGet(): Promise<WooCart | null> {
   const token = getCartToken();
   if (!token) return null;
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/cart`, {
+  const res = await fetch(`${LARAVEL_API_URL}/cart`, {
     headers: {
       Accept: "application/json",
       "Cart-Token": token,
@@ -419,7 +412,7 @@ export async function apiCartGet(): Promise<WooCart | null> {
 /** Process checkout */
 export async function apiCheckout(data: CheckoutFormData, cartToken?: string) {
   const token = cartToken || getCartToken();
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/checkout`, {
+  const res = await fetch(`${LARAVEL_API_URL}/checkout`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -452,7 +445,7 @@ export async function apiCreateOrder(payload: {
   country: string;
   customer_note?: string;
 }) {
-  const res = await fetch(`${WOOCOMMERCE_PROXY_URL}/orders`, {
+  const res = await fetch(`${LARAVEL_API_URL}/orders`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

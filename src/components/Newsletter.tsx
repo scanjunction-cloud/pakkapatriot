@@ -51,13 +51,13 @@ export default function Newsletter() {
 
           <div className="text-left">
             {/* SVG Flight paths */}
-            <svg className="w-16 h-8 text-[#EB5A12]" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-16 h-8 text-[#F6B828]" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M10,20 Q40,5 60,15 T90,10" strokeDasharray="3 3" />
               <polygon points="90,10 82,6 85,12" fill="currentColor" />
             </svg>
             <h3 className="font-brush text-3xl sm:text-4xl text-[#0A2240] tracking-wide leading-none mt-2">
               LET'S STAY <br />
-              <span className="text-[#EB5A12]">IN TOUCH!</span>
+              <span className="text-[#F6B828]">IN TOUCH!</span>
             </h3>
             <p className="font-sans text-xs sm:text-sm text-[#4E637A] font-semibold mt-1">
               Get stories, fun facts and updates straight to your inbox.
@@ -91,7 +91,7 @@ export default function Newsletter() {
                       setEmail(e.target.value);
                       if (error) setError("");
                     }}
-                    className="w-full bg-white border border-[#DCD3B5] text-[#0A2240] px-6 py-4 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] placeholder-gray-400 shadow-inner"
+                    className="w-full bg-white border border-[#DCD3B5] text-[#0A2240] px-6 py-4 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] placeholder-gray-400 shadow-inner"
                   />
                   {error && (
                     <span className="absolute -bottom-6 left-2 text-xs font-bold text-red-500">
@@ -102,7 +102,7 @@ export default function Newsletter() {
 
                 <button
                   type="submit"
-                  className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white font-bold text-sm px-8 py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md cursor-pointer select-none"
+                  className="bg-[#F6B828] hover:bg-[#D04D0E] text-white font-bold text-sm px-8 py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md cursor-pointer select-none"
                 >
                   <Send size={16} />
                   SUBSCRIBE

@@ -4,13 +4,19 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import GreenHighlights from "./components/GreenHighlights";
 import WhatPakkaLoves from "./components/WhatPakkaLoves";
 import LatestStories from "./components/LatestStories";
+import StoryDetailPage from "./components/StoryDetailPage";
+import MadeInIndiaPage from "./components/MadeInIndiaPage";
 import WooCommerceShop from "./components/WooCommerceShop";
 import Newsletter from "./components/Newsletter";
+import AboutUs from "./components/AboutUs";
+import StoriesPage from "./components/StoriesPage";
+import ExplorePage from "./components/ExplorePage";
 import Footer from "./components/Footer";
 import DetailModal from "./components/DetailModal";
 import CheckoutModal from "./components/CheckoutModal";
@@ -21,6 +27,7 @@ import { X, Play, Heart, Award, Trophy, MapPin, Sparkles, ShoppingCart, Shopping
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
+  const navigate = useNavigate();
   const { state: cartState, addItem, removeItem, updateQuantity, setOpen, totalItems, totalPrice, clearCart } = useCart();
 
   // Data lists
@@ -122,6 +129,8 @@ export default function App() {
         onJoinJourneyClick={() => setJourneyOpen(true)}
         onTabChange={setActiveTab}
         activeTab={activeTab}
+        onSelectLoveCategory={setSelectedLoveCategory}
+        selectedLoveCategory={selectedLoveCategory}
       />
 
       {/* Floating Cart Badge / Drawer trigger */}
@@ -129,10 +138,10 @@ export default function App() {
         <div className="fixed bottom-6 right-6 z-30">
           <button
             onClick={() => setOpen(true)}
-            className="bg-[#EB5A12] text-white p-4 rounded-full shadow-2xl hover:bg-[#D04D0E] transition-all duration-200 transform hover:scale-110 flex items-center gap-2 select-none font-bold"
+            className="bg-[#F6B828] text-white p-4 rounded-full shadow-2xl hover:bg-[#DAA520] transition-all duration-200 transform hover:scale-110 flex items-center gap-2 select-none font-bold"
           >
             <ShoppingCart size={22} className="animate-bounce" />
-            <span className="bg-white text-[#EB5A12] px-2.5 py-0.5 rounded-full text-xs min-w-[24px]">
+            <span className="bg-white text-[#F6B828] px-2.5 py-0.5 rounded-full text-xs min-w-[24px]">
               {totalItems}
             </span>
           </button>
@@ -141,65 +150,95 @@ export default function App() {
 
       {/* MAIN CONTENT COMPOSITION */}
       <main className="flex-grow">
-        
-        {/* HERO SECTION */}
-        <Hero
-          onExploreStories={() => {
-            const el = document.getElementById("latest-stories");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
-          onWatchVideo={() => setVideoOpen(true)}
-        />
+        <Routes>
+          <Route path="/" element={
+            <>
+              {/* HERO SECTION */}
+              <Hero
+                onExploreStories={() => {
+                  const el = document.getElementById("latest-stories");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                onWatchVideo={() => setVideoOpen(true)}
+              />
 
-        {/* GREEN HIGH-LIGHTS STRIP */}
-        <GreenHighlights
-          onCardClick={(pillarId) => {
-            if (pillarId === "learns") {
-              setSelectedLoveCategory("HERITAGE");
-            } else if (pillarId === "explores") {
-              setSelectedLoveCategory("PLACES");
-            } else if (pillarId === "celebrates") {
-              setSelectedLoveCategory("TRADITIONS");
-            } else if (pillarId === "creates") {
-              setSelectedLoveCategory("INNOVATIONS");
-            }
-          }}
-        />
+              {/* GREEN HIGH-LIGHTS STRIP */}
+              <GreenHighlights
+                onCardClick={(pillarId) => {
+                  if (pillarId === "learns") {
+                    setSelectedLoveCategory("HERITAGE");
+                  } else if (pillarId === "explores") {
+                    setSelectedLoveCategory("PLACES");
+                  } else if (pillarId === "celebrates") {
+                    setSelectedLoveCategory("TRADITIONS");
+                  } else if (pillarId === "creates") {
+                    setSelectedLoveCategory("INNOVATIONS");
+                  }
+                }}
+              />
 
-        {/* WHAT PAKKA LOVES GRID */}
-        <WhatPakkaLoves
-          onSelectCategory={setSelectedLoveCategory}
-          selectedCategory={selectedLoveCategory}
-        />
+              {/* WHAT PAKKA LOVES GRID */}
+              <WhatPakkaLoves
+                onSelectCategory={setSelectedLoveCategory}
+                selectedCategory={selectedLoveCategory}
+                onMadeInIndiaClick={() => navigate("/made-in-india")}
+              />
 
-        {/* LATEST STORIES (WORDPRESS SYNC) */}
-        <LatestStories
-          posts={searchedPosts}
-          loading={loadingPosts}
-          onPostClick={setSelectedPost}
-          selectedCategory={selectedLoveCategory}
-          onViewAllStories={() => {
-            setSelectedLoveCategory(null);
-            setSearchQuery("");
-            const el = document.getElementById("latest-stories");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
-        />
+              {/* PAKKA PATRIOT STORE */}
+              <WooCommerceShop
+                products={searchedProducts}
+                loading={loadingProducts}
+                selectedCategory={selectedMerchCategory}
+                onProductClick={setSelectedProduct}
+                onClearCategory={() => {
+                  setSelectedMerchCategory(null);
+                  setSearchQuery("");
+                }}
+                onViewAll={() => navigate("/made-in-india")}
+              />
 
-        {/* WOOCOMMERCE PRODUCT STORE SHOWCASE */}
-        <WooCommerceShop
-          products={searchedProducts}
-          loading={loadingProducts}
-          selectedCategory={selectedMerchCategory}
-          onProductClick={setSelectedProduct}
-          onClearCategory={() => {
-            setSelectedMerchCategory(null);
-            setSearchQuery("");
-          }}
-        />
+              {/* LATEST STORIES (WORDPRESS SYNC) */}
+              <LatestStories
+                posts={searchedPosts}
+                loading={loadingPosts}
+                onPostClick={(post) => navigate(`/blog/${post.slug}`, { state: { post } })}
+                selectedCategory={selectedLoveCategory}
+                onViewAllStories={() => {
+                  setSelectedLoveCategory(null);
+                  setSearchQuery("");
+                  const el = document.getElementById("latest-stories");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
 
-        {/* NEWSLETTER FORM */}
-        <Newsletter />
+              {/* NEWSLETTER FORM */}
+              <Newsletter />
+            </>
+          } />
+          <Route path="/stories" element={
+            <StoriesPage onJoinJourneyClick={() => setJourneyOpen(true)} />
+          } />
+          <Route path="/blog/:slug" element={
+            <StoryDetailPage />
+          } />
+          <Route path="/explore" element={
+            <ExplorePage
+              posts={posts}
+              loading={loadingPosts}
+              onPostClick={(post) => navigate(`/blog/${post.slug}`, { state: { post } })}
+            />
+          } />
+          <Route path="/made-in-india" element={
+            <MadeInIndiaPage
+              products={products}
+              loading={loadingProducts}
+              onProductClick={setSelectedProduct}
+            />
+          } />
+          <Route path="/about" element={
+            <AboutUs onJoinJourneyClick={() => setJourneyOpen(true)} />
+          } />
+        </Routes>
       </main>
 
       {/* FOOTER SECTION */}
@@ -244,7 +283,7 @@ export default function App() {
               {/* Drawer Header */}
               <div className="p-6 border-b border-[#F0EBE0] flex justify-between items-center bg-white">
                 <div className="flex items-center gap-2">
-                  <ShoppingCart className="text-[#EB5A12]" size={20} />
+                  <ShoppingCart className="text-[#F6B828]" size={20} />
                   <h3 className="font-display font-black text-lg text-[#0A2240]">YOUR BAG ({totalItems})</h3>
                 </div>
                 <button
@@ -279,7 +318,7 @@ export default function App() {
                           {item.product.category}
                         </span>
                         <h4 className="font-display font-bold text-xs text-[#0A2240] truncate">{item.product.name}</h4>
-                        <p className="font-sans font-black text-sm text-[#EB5A12]">₹{item.product.price}</p>
+                        <p className="font-sans font-black text-sm text-[#F6B828]">₹{item.product.price}</p>
                       </div>
                       {/* Quantity controls */}
                       <div className="flex items-center border border-[#DCD3B5] rounded-lg overflow-hidden flex-shrink-0">
@@ -308,7 +347,7 @@ export default function App() {
               <div className="p-6 border-t border-[#F0EBE0] bg-white space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-sm text-[#0A2240]">Subtotal</span>
-                  <span className="text-xl font-black text-[#EB5A12]">₹{totalPrice}</span>
+                  <span className="text-xl font-black text-[#F6B828]">₹{totalPrice}</span>
                 </div>
 
                 <div className="space-y-2">
@@ -319,7 +358,7 @@ export default function App() {
                         setOpen(false);
                         setCheckoutOpen(true);
                       }}
-                      className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 select-none cursor-pointer"
+                      className="w-full bg-[#F6B828] hover:bg-[#DAA520] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 select-none cursor-pointer"
                     >
                       <CreditCard size={16} />
                       PROCEED TO CHECKOUT
@@ -390,11 +429,11 @@ export default function App() {
             ) : (
               <form onSubmit={handleJourneySubmit} className="space-y-5">
                 <div className="text-center sm:text-left select-none">
-                  <span className="text-[10px] font-black tracking-widest text-[#EB5A12] uppercase font-sans">
+                  <span className="text-[10px] font-black tracking-widest text-[#F6B828] uppercase font-sans">
                     EXPLORE REAL INDIA
                   </span>
                   <h3 className="font-brush text-3xl sm:text-4xl text-[#0A2240] tracking-wide mt-1">
-                    BECOME A <span className="text-[#EB5A12]">BUDDY!</span>
+                    BECOME A <span className="text-[#F6B828]">BUDDY!</span>
                   </h3>
                   <p className="text-xs text-[#4E637A] font-semibold mt-1">
                     Get an official buddy identity card, free sticker packets, and local explorer puzzles sent to you!
@@ -404,20 +443,20 @@ export default function App() {
                 <div className="space-y-4 pt-2">
                   <div>
                     <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Your Name</label>
-                    <input type="text" required placeholder="e.g. Aarav Sharma" value={journeyForm.name} onChange={(e) => setJourneyForm({ ...journeyForm, name: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
+                    <input type="text" required placeholder="e.g. Aarav Sharma" value={journeyForm.name} onChange={(e) => setJourneyForm({ ...journeyForm, name: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] text-[#0A2240]" />
                   </div>
                   <div>
                     <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Parent's / Your Email</label>
-                    <input type="email" required placeholder="e.g. aarav@gmail.com" value={journeyForm.email} onChange={(e) => setJourneyForm({ ...journeyForm, email: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
+                    <input type="email" required placeholder="e.g. aarav@gmail.com" value={journeyForm.email} onChange={(e) => setJourneyForm({ ...journeyForm, email: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] text-[#0A2240]" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">Age</label>
-                      <input type="number" placeholder="e.g. 12" value={journeyForm.age} onChange={(e) => setJourneyForm({ ...journeyForm, age: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
+                      <input type="number" placeholder="e.g. 12" value={journeyForm.age} onChange={(e) => setJourneyForm({ ...journeyForm, age: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] text-[#0A2240]" />
                     </div>
                     <div>
                       <label className="text-xs font-black text-[#0A2240] uppercase tracking-wider block mb-1">City</label>
-                      <input type="text" placeholder="e.g. Jaipur" value={journeyForm.city} onChange={(e) => setJourneyForm({ ...journeyForm, city: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] text-[#0A2240]" />
+                      <input type="text" placeholder="e.g. Jaipur" value={journeyForm.city} onChange={(e) => setJourneyForm({ ...journeyForm, city: e.target.value })} className="w-full bg-white border border-[#DCD3B5] px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] text-[#0A2240]" />
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -426,7 +465,7 @@ export default function App() {
                       {["🎨 Local Art", "🕌 Historic Monuments", "⛰️ Mountains", "📚 Indian Freedom Fighters", "🧩 Fun Quizzes"].map((interest) => {
                         const active = journeyForm.interests.includes(interest);
                         return (
-                          <button type="button" key={interest} onClick={() => handleInterestToggle(interest)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${active ? "bg-[#EB5A12] border-[#EB5A12] text-white" : "bg-white border-[#DCD3B5] text-[#0A2240] hover:bg-gray-50"}`}>
+                          <button type="button" key={interest} onClick={() => handleInterestToggle(interest)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${active ? "bg-[#F6B828] border-[#F6B828] text-white" : "bg-white border-[#DCD3B5] text-[#0A2240] hover:bg-gray-50"}`}>
                             {interest}
                           </button>
                         );
@@ -434,7 +473,7 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-4">
+                <button type="submit" className="w-full bg-[#F6B828] hover:bg-[#DAA520] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-4">
                   <Trophy size={16} />
                   CLAIM BUDDY PASSPORT
                 </button>

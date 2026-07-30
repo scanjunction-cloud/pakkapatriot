@@ -18,7 +18,7 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
     <section className="relative overflow-hidden pt-12 pb-16 sm:pb-24 lg:pt-20 lg:pb-24 bg-[#F8F0EB]">
       {/* Dynamic graphic particles in background */}
       <div className="absolute top-1/4 left-10 w-24 h-24 bg-[#F6B828]/10 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-36 h-36 bg-[#EB5A12]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-36 h-36 bg-[#F6B828]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -33,7 +33,7 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
             >
               <h1 className="font-brush text-5xl sm:text-7xl lg:text-8xl leading-none tracking-wide text-[#0A2240] select-none">
                 KNOW INDIA. <br />
-                <span className="text-[#EB5A12]">BE INDIA.</span>
+                <span className="text-[#F6B828]">BE INDIA.</span>
               </h1>
 
               <p className="font-sans text-lg sm:text-xl text-[#2F445A] font-medium leading-relaxed max-w-lg">
@@ -44,7 +44,7 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={onExploreStories}
-                  className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-8 py-4 rounded-xl text-md font-bold shadow-md hover:shadow-lg transition-all duration-250 flex items-center justify-center gap-2 group cursor-pointer"
+                  className="bg-[#F6B828] hover:bg-[#DAA520] text-white px-8 py-4 rounded-xl text-md font-bold shadow-md hover:shadow-lg transition-all duration-250 flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   EXPLORE STORIES
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -68,7 +68,7 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
                 <div className="pt-2">
                   <p className="font-brush text-2xl text-[#2F445A] rotate-[-4deg] tracking-wide">
                     Curious minds <br />
-                    <span className="text-[#EB5A12]">change the country!</span>
+                    <span className="text-[#F6B828]">change the country!</span>
                   </p>
                 </div>
               </div>
@@ -90,10 +90,11 @@ export default function Hero({ onExploreStories, onWatchVideo }: HeroProps) {
               <img
                 src={HERO_IMAGE}
                 alt="Pakka Patriot Character — Know India. Be India."
-                className="w-full h-auto rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]"
+                className="w-full h-auto rounded-3xl transition-all duration-300 transform hover:scale-[1.01]"
                 referrerPolicy="no-referrer"
               />
-              
+
+
               {/* Quick info badge floating */}
               <div className="absolute -bottom-6 -left-4 sm:left-4 bg-white border border-[#E4DCB9] px-5 py-3 rounded-2xl shadow-lg flex items-center gap-3 select-none">
                 <span className="flex h-3 w-3 relative">

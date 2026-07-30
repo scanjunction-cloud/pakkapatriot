@@ -28,7 +28,7 @@ export function getCategoryBadgeClasses(cat: string): { bg: string; text: string
   } else if (norm.includes("PEOPLE")) {
     return { bg: "bg-[#6D28D9]", text: "text-white" };
   } else {
-    return { bg: "bg-[#EB5A12]", text: "text-white" };
+    return { bg: "bg-[#F6B828]", text: "text-white" };
   }
 }
 
@@ -56,6 +56,13 @@ export default function LatestStories({
       })
     : posts;
 
+  // Helper to truncate text to a given word count
+  const truncateToWords = (text: string, maxWords: number) => {
+    const words = text.trim().split(/\s+/);
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
+  };
+
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const { scrollLeft, clientWidth } = scrollContainerRef.current;
@@ -75,18 +82,18 @@ export default function LatestStories({
       <div className="flex justify-between items-end mb-8 select-none">
         <div className="text-left">
           <h2 className="font-brush text-4xl sm:text-5xl text-[#0A2240] tracking-wide">
-            LATEST <span className="text-[#EB5A12]">STORIES</span>
+            LATEST <span className="text-[#F6B828]">STORIES</span>
           </h2>
           {selectedCategory && (
             <p className="text-sm font-semibold text-[#587760] mt-1 font-sans">
-              Filtered by: <span className="text-[#EB5A12] uppercase">{selectedCategory.replace("_", " ")}</span>
+              Filtered by: <span className="text-[#F6B828] uppercase">{selectedCategory.replace("_", " ")}</span>
             </p>
           )}
         </div>
         
         <button
           onClick={onViewAllStories}
-          className="flex items-center gap-2 text-sm sm:text-md font-bold text-[#EB5A12] hover:text-[#D04D0E] transition-colors cursor-pointer group"
+          className="flex items-center gap-2 text-sm sm:text-md font-bold text-[#F6B828] hover:text-[#DAA520] transition-colors cursor-pointer group"
         >
           View all stories
           <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
@@ -114,7 +121,7 @@ export default function LatestStories({
           <p className="text-sm text-[#2F445A] mb-4">We couldn't find stories matching this filter. Tap below to reset.</p>
           <button
             onClick={onViewAllStories}
-            className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all shadow"
+            className="bg-[#F6B828] hover:bg-[#DAA520] text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all shadow"
           >
             Show All Stories
           </button>
@@ -124,14 +131,14 @@ export default function LatestStories({
           {/* Slider Buttons */}
           <button
             onClick={() => scroll("left")}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white border border-[#E4DCB9] text-[#0A2240] hover:text-[#EB5A12] p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hidden sm:flex items-center justify-center cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white border border-[#E4DCB9] text-[#0A2240] hover:text-[#F6B828] p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hidden sm:flex items-center justify-center cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
             title="Scroll Left"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-[#EB5A12] hover:bg-[#D04D0E] text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hidden sm:flex items-center justify-center cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-[#F6B828] hover:bg-[#DAA520] text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hidden sm:flex items-center justify-center cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
             title="Scroll Right"
           >
             <ChevronRight size={20} />
@@ -152,7 +159,7 @@ export default function LatestStories({
                 >
                   <motion.div
                     whileHover={{ y: -6 }}
-                    className="h-full bg-white rounded-3xl overflow-hidden border border-[#F0EBE0] hover:border-[#EB5A12]/40 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer group"
+                    className="h-full bg-white rounded-3xl overflow-hidden border border-[#F0EBE0] hover:border-[#F6B828]/40 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer group"
                   >
                     {/* Featured Image with loading/aspect optimization */}
                     <div className="relative h-48 sm:h-52 overflow-hidden bg-[#FAF6EC]">
@@ -175,13 +182,13 @@ export default function LatestStories({
                       </span>
 
                       {/* Title */}
-                      <h3 className="font-display font-extrabold text-md sm:text-lg text-[#0A2240] tracking-tight leading-snug mb-2 group-hover:text-[#EB5A12] transition-colors">
+                      <h3 className="font-display font-extrabold text-md sm:text-lg text-[#0A2240] tracking-tight leading-snug mb-2 group-hover:text-[#F6B828] transition-colors">
                         {post.title}
                       </h3>
 
-                      {/* Excerpt */}
+                      {/* Excerpt (truncated to 25 words) */}
                       <p className="font-sans text-xs sm:text-sm text-[#4E637A] font-medium leading-relaxed flex-grow">
-                        {post.excerpt}
+                        {truncateToWords(post.excerpt, 25)}
                       </p>
 
                       {/* Footer Info */}

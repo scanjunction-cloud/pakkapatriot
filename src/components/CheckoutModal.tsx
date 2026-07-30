@@ -135,7 +135,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
             <p className="text-sm text-[#4E637A]">Add some patriotic merchandise to get started!</p>
             <button
               onClick={onClose}
-              className="bg-[#EB5A12] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#D04D0E] transition-all cursor-pointer"
+              className="bg-[#F6B828] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#DAA520] transition-all cursor-pointer"
             >
               Continue Shopping
             </button>
@@ -185,7 +185,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 <div
                   className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                     i <= stepIndex
-                      ? "bg-[#EB5A12] text-white"
+                      ? "bg-[#F6B828] text-white"
                       : "bg-[#E4DCB9] text-[#8A9EB4]"
                   }`}
                 >
@@ -194,7 +194,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 {i < steps.length - 1 && (
                   <div
                     className={`w-8 h-0.5 transition-colors ${
-                      i < stepIndex ? "bg-[#EB5A12]" : "bg-[#E4DCB9]"
+                      i < stepIndex ? "bg-[#F6B828]" : "bg-[#E4DCB9]"
                     }`}
                   />
                 )}
@@ -209,7 +209,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
           {step === "review" && (
             <div className="p-6 space-y-5">
               <h3 className="font-display font-bold text-lg text-[#0A2240] flex items-center gap-2">
-                <ShoppingBag size={18} className="text-[#EB5A12]" />
+                <ShoppingBag size={18} className="text-[#F6B828]" />
                 Review Your Items
               </h3>
               <div className="space-y-3">
@@ -228,12 +228,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 </div>
                 <div className="flex justify-between text-lg font-black text-[#0A2240] pt-2 border-t border-[#F0EBE0]">
                   <span>Total</span>
-                  <span className="text-[#EB5A12]">₹{totalPrice}</span>
+                  <span className="text-[#F6B828]">₹{totalPrice}</span>
                 </div>
               </div>
               <button
                 onClick={() => setStep("shipping")}
-                className="w-full bg-[#EB5A12] hover:bg-[#D04D0E] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#F6B828] hover:bg-[#DAA520] text-white py-3.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 Proceed to Shipping <ArrowRight size={16} />
               </button>
@@ -244,7 +244,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
           {step === "shipping" && (
             <div className="p-6 space-y-5">
               <h3 className="font-display font-bold text-lg text-[#0A2240] flex items-center gap-2">
-                <Truck size={18} className="text-[#EB5A12]" />
+                <Truck size={18} className="text-[#F6B828]" />
                 Shipping Details
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -264,7 +264,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                   <div className="relative">
                     <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9EB4]" />
                     <select value={form.state} onChange={(e) => updateField("state", e.target.value)}
-                      className="w-full bg-white border border-[#DCD3B5] pl-9 pr-4 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] focus:ring-1 focus:ring-[#EB5A12] appearance-none text-[#0A2240]">
+                      className="w-full bg-white border border-[#DCD3B5] pl-9 pr-4 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] focus:ring-1 focus:ring-[#F6B828] appearance-none text-[#0A2240]">
                       <option value="">Select state</option>
                       {INDIAN_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}
                     </select>
@@ -281,13 +281,13 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 </button>
                 <button onClick={() => setStep("payment")} disabled={!isShippingValid}
                   className={`flex-[2] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    isShippingValid ? "bg-[#EB5A12] hover:bg-[#D04D0E] text-white shadow" : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    isShippingValid ? "bg-[#F6B828] hover:bg-[#DAA520] text-white shadow" : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}>
                   Continue to Payment <ArrowRight size={16} />
                 </button>
               </div>
               {!isShippingValid && (
-                <p className="text-xs text-[#EB5A12] font-semibold text-center">Please fill in all required fields (*)</p>
+                <p className="text-xs text-[#F6B828] font-semibold text-center">Please fill in all required fields (*)</p>
               )}
             </div>
           )}
@@ -296,7 +296,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
           {step === "payment" && (
             <div className="p-6 space-y-5">
               <h3 className="font-display font-bold text-lg text-[#0A2240] flex items-center gap-2">
-                <CreditCard size={18} className="text-[#EB5A12]" />
+                <CreditCard size={18} className="text-[#F6B828]" />
                 Place Order
               </h3>
               <div className="bg-[#FCFAF5] border border-[#F0EBE0] rounded-2xl p-4 space-y-2">
@@ -309,7 +309,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 ))}
                 <div className="border-t border-[#E4DCB9] pt-2 flex justify-between font-black text-lg">
                   <span>Total</span>
-                  <span className="text-[#EB5A12]">₹{totalPrice}</span>
+                  <span className="text-[#F6B828]">₹{totalPrice}</span>
                 </div>
               </div>
               <div className="bg-[#F8FAFB] border border-[#E4DCB9] rounded-2xl p-4 text-sm space-y-1">
@@ -340,7 +340,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 </button>
                 <button onClick={handlePlaceOrder} disabled={submitting}
                   className={`flex-[2] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    submitting ? "bg-gray-400 text-white cursor-wait" : "bg-[#EB5A12] hover:bg-[#D04D0E] text-white shadow-lg"
+                    submitting ? "bg-gray-400 text-white cursor-wait" : "bg-[#F6B828] hover:bg-[#DAA520] text-white shadow-lg"
                   }`}>
                   {submitting ? (
                     <><RefreshCw size={16} className="animate-spin" /> Placing Order...</>
@@ -361,7 +361,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
               <div className="space-y-2">
                 <h3 className="font-display font-black text-2xl text-[#0A2240]">Order Received! 🎉</h3>
                 <p className="text-sm text-[#4E637A] font-semibold">
-                  Your order <span className="font-black text-[#EB5A12]">#{orderResult.order_id}</span> has been recorded successfully.
+                  Your order <span className="font-black text-[#F6B828]">#{orderResult.order_id}</span> has been recorded successfully.
                 </p>
               </div>
               <div className="bg-[#FCFAF5] border border-[#F0EBE0] rounded-2xl p-5 max-w-sm mx-auto space-y-2 text-left text-sm">
@@ -371,7 +371,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8A9EB4]">Total</span>
-                  <span className="font-black text-[#EB5A12]">{orderResult.currency} {orderResult.total}</span>
+                  <span className="font-black text-[#F6B828]">{orderResult.currency} {orderResult.total}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8A9EB4]">Status</span>
@@ -382,7 +382,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 Your order is now with the PakkaPatriot team. We'll review it and get back to you at <span className="font-bold">{form.email}</span> with payment and delivery details.
               </p>
               <div className="pt-2">
-                <button onClick={onClose} className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-8 py-3 rounded-xl font-bold text-sm shadow transition-all cursor-pointer">
+                <button onClick={onClose} className="bg-[#F6B828] hover:bg-[#DAA520] text-white px-8 py-3 rounded-xl font-bold text-sm shadow transition-all cursor-pointer">
                   Continue Shopping
                 </button>
               </div>
@@ -414,7 +414,7 @@ const CartReviewItem: React.FC<{ item: CartItem }> = ({ item }) => {
       <div className="flex-grow min-w-0">
         <span className="text-[10px] font-black text-[#587760] uppercase tracking-wide block">{item.product.category}</span>
         <h4 className="font-display font-bold text-sm text-[#0A2240] truncate">{item.product.name}</h4>
-        <p className="font-black text-sm text-[#EB5A12]">₹{item.product.price}</p>
+        <p className="font-black text-sm text-[#F6B828]">₹{item.product.price}</p>
       </div>
       <div className="flex items-center gap-2">
         <div className="flex items-center border border-[#DCD3B5] rounded-lg overflow-hidden">
@@ -442,7 +442,7 @@ const InputField: React.FC<{
       <div className="relative">
         {Icon && <Icon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9EB4]" />}
         <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-          className={`w-full bg-white border border-[#DCD3B5] ${Icon ? "pl-9" : "pl-4"} pr-4 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#EB5A12] focus:ring-1 focus:ring-[#EB5A12] text-[#0A2240]`} />
+          className={`w-full bg-white border border-[#DCD3B5] ${Icon ? "pl-9" : "pl-4"} pr-4 py-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#F6B828] focus:ring-1 focus:ring-[#F6B828] text-[#0A2240]`} />
       </div>
     </div>
   );

@@ -107,7 +107,7 @@ export default function DetailModal({ post, product, onClose }: DetailModalProps
                 </div>
 
                 {/* Excerpt */}
-                <p className="text-md font-semibold text-[#2F445A] leading-relaxed italic border-l-4 border-[#EB5A12] pl-4 text-left">
+                <p className="text-md font-semibold text-[#2F445A] leading-relaxed italic border-l-4 border-[#F6B828] pl-4 text-left">
                   {post.excerpt}
                 </p>
 
@@ -133,7 +133,7 @@ export default function DetailModal({ post, product, onClose }: DetailModalProps
                     href={post.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-6 py-3 rounded-xl text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
+                    className="w-full sm:w-auto bg-[#F6B828] hover:bg-[#DAA520] text-white px-6 py-3 rounded-xl text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
                   >
                     Read original post
                     <ExternalLink size={14} />
@@ -155,7 +155,7 @@ export default function DetailModal({ post, product, onClose }: DetailModalProps
                   referrerPolicy="no-referrer"
                 />
                 {product.onSale && (
-                  <div className="absolute top-4 left-4 bg-[#EB5A12] text-white text-xs font-black px-4 py-1.5 rounded-full shadow-md select-none">
+                  <div className="absolute top-4 left-4 bg-[#F6B828] text-white text-xs font-black px-4 py-1.5 rounded-full shadow-md select-none">
                     SALE ACTIVE
                   </div>
                 )}
@@ -174,7 +174,7 @@ export default function DetailModal({ post, product, onClose }: DetailModalProps
 
                   {/* Pricing */}
                   <div className="flex items-baseline gap-2 mt-3 font-sans border-b border-[#F0EBE0] pb-4">
-                    <span className="font-display font-black text-2xl text-[#EB5A12]">
+                    <span className="font-display font-black text-2xl text-[#F6B828]">
                       ₹{product.price}
                     </span>
                     {product.onSale && (
@@ -245,7 +245,7 @@ export default function DetailModal({ post, product, onClose }: DetailModalProps
                     {/* Buy Now — adds to cart & opens drawer */}
                     <button
                       onClick={handleBuyNow}
-                      className="bg-[#EB5A12] hover:bg-[#D04D0E] text-white px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer flex-shrink-0"
+                      className="bg-[#F6B828] hover:bg-[#DAA520] text-white px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer flex-shrink-0"
                     >
                       BUY NOW
                       <ArrowRight size={16} />
