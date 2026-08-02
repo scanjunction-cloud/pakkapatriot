@@ -4,7 +4,12 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import PlayPage from "./components/PlayPage";
+import ChaukabaaraGamePage from "./components/ChaukabaaraGamePage";
+import AaduPuliAatamGamePage from "./components/AaduPuliAatamGamePage";
+import ChaturvimshatiGamePage from "./components/ChaturvimshatiGamePage";
+import VishAmritGamePage from "./components/VishAmritGamePage";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import GreenHighlights from "./components/GreenHighlights";
@@ -28,6 +33,8 @@ import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isGamePage = location.pathname.startsWith("/play/");
   const { state: cartState, addItem, removeItem, updateQuantity, setOpen, totalItems, totalPrice, clearCart } = useCart();
 
   // Data lists
@@ -122,6 +129,7 @@ export default function App() {
     <div className="min-h-screen bg-brand-cream relative flex flex-col font-sans">
       
       {/* HEADER SECTION */}
+      {!isGamePage && (
       <Header
         onSearch={setSearchQuery}
         onFilterMerchCategory={setSelectedMerchCategory}
@@ -132,9 +140,10 @@ export default function App() {
         onSelectLoveCategory={setSelectedLoveCategory}
         selectedLoveCategory={selectedLoveCategory}
       />
+      )}
 
       {/* Floating Cart Badge / Drawer trigger */}
-      {totalItems > 0 && (
+      {!isGamePage && totalItems > 0 && (
         <div className="fixed bottom-6 right-6 z-30">
           <button
             onClick={() => setOpen(true)}
@@ -238,14 +247,31 @@ export default function App() {
           <Route path="/about" element={
             <AboutUs onJoinJourneyClick={() => setJourneyOpen(true)} />
           } />
+          <Route path="/play" element={
+            <PlayPage />
+          } />
+          <Route path="/play/chaukabaara" element={
+            <ChaukabaaraGamePage />
+          } />
+          <Route path="/play/aadu-puli-aatam" element={
+            <AaduPuliAatamGamePage />
+          } />
+          <Route path="/play/chaturvimshati" element={
+            <ChaturvimshatiGamePage />
+          } />
+          <Route path="/play/vish-amrit" element={
+            <VishAmritGamePage />
+          } />
         </Routes>
       </main>
 
       {/* FOOTER SECTION */}
+      {!isGamePage && (
       <Footer
         onTabChange={setActiveTab}
         onJoinJourneyClick={() => setJourneyOpen(true)}
       />
+      )}
 
       {/* DYNAMIC STORY / PRODUCT DEEP-DIVE MODAL */}
       {(selectedPost || selectedProduct) && (

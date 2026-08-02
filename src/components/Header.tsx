@@ -89,6 +89,10 @@ export default function Header({
       navigate("/made-in-india");
       return;
     }
+    if (catId === "PLAY") {
+      navigate("/play");
+      return;
+    }
     if (selectedLoveCategory === catId) {
       onSelectLoveCategory?.(null);
     } else {
@@ -111,6 +115,10 @@ export default function Header({
     setMobileMenuOpen(false);
     if (catId === "MADE_IN_INDIA") {
       navigate("/made-in-india");
+      return;
+    }
+    if (catId === "PLAY") {
+      navigate("/play");
       return;
     }
     onSelectLoveCategory?.(catId);
@@ -160,6 +168,13 @@ export default function Header({
                 </button>
               );
             })}
+            <Link
+              to="/play"
+              className="ml-1 flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold text-[#587760] hover:text-[#F6B828] hover:bg-[#F8F4EA] transition-all duration-200 border-l border-[#E4DCB9]"
+            >
+              <Gamepad2 size={16} className="text-[#F6B828]" />
+              GAMES
+            </Link>
           </nav>
 
           {/* Actions: Search, Join Journey, Mobile Menu Toggle */}
@@ -251,6 +266,14 @@ export default function Header({
               </button>
             );
           })}
+          <Link
+            to="/play"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold tracking-wide text-[#587760] hover:bg-[#FAF6EC]"
+          >
+            <Gamepad2 size={18} className="text-[#F6B828]" />
+            GAMES
+          </Link>
           <div className="pt-4 border-t border-[#E4DCB9]">
             <button
               onClick={() => {

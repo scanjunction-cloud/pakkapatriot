@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/woocommerce/?$", "destination": "/api/woocommerce/home" },
+    { "source": "/api/woocommerce/(.*)", "destination": "/api/woocommerce/home" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
